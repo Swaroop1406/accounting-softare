@@ -1,0 +1,20 @@
+[project]
+name = "repl-nix-workspace"
+version = "0.1.0"
+description = "Flask-based accounting and inventory management system"
+requires-python = ">=3.11"
+dependencies = [
+    "flask>=2.0.0",
+    "flask-sqlalchemy>=3.0.0",
+    "flask-wtf>=1.0.0",
+    "flask-login>=0.6.0",
+    "gunicorn>=20.0.0",
+    "psycopg2-binary>=2.9.0",
+    "werkzeug>=2.0.0",
+    "pandas>=1.5.0",
+    "openpyxl>=3.0.0",
+    "qrcode>=7.0",
+    "pillow>=9.0.0",
+    "pdfkit>=1.0.0",
+    "email-validator>=1.0.0"
+]

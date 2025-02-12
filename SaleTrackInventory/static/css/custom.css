@@ -1,0 +1,238 @@
+/* Custom styling for the accounting system */
+
+:root {
+    --sales-color: #28a745;
+    --purchases-color: #fd7e14;
+    --inventory-color: #0d6efd;
+    --text-primary: #2c3e50;
+    --border-color: #e9ecef;
+    --hover-bg: #f8f9fa;
+}
+
+/* Card styling */
+.card {
+    border-radius: 0.75rem;
+    margin-bottom: 1.5rem;
+    border: 1px solid var(--border-color);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    background-color: #ffffff;
+}
+
+.card-title {
+    color: var(--text-primary);
+    font-weight: 600;
+    font-size: 1.25rem;
+    margin-bottom: 1.25rem;
+}
+
+/* Section specific styling */
+.sales-section .card-title {
+    color: var(--sales-color);
+}
+
+.purchases-section .card-title {
+    color: var(--purchases-color);
+}
+
+.inventory-section .card-title {
+    color: var(--inventory-color);
+}
+
+/* Dashboard stats cards */
+.dashboard-stat {
+    transition: transform 0.2s, box-shadow 0.2s;
+    padding: 1.5rem;
+}
+
+.dashboard-stat:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.dashboard-stat.sales {
+    border-left: 4px solid var(--sales-color);
+}
+
+.dashboard-stat.purchases {
+    border-left: 4px solid var(--purchases-color);
+}
+
+.dashboard-stat.inventory {
+    border-left: 4px solid var(--inventory-color);
+}
+
+/* Table styling */
+.table {
+    margin-bottom: 0;
+    color: var(--text-primary);
+}
+
+.table th {
+    background-color: #f8f9fa;
+    font-weight: 600;
+    border-bottom: 2px solid var(--border-color);
+    padding: 1rem;
+}
+
+.table td {
+    padding: 1rem;
+    vertical-align: middle;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.table tbody tr:hover {
+    background-color: var(--hover-bg);
+}
+
+/* Sales table specific */
+.sales-table tbody tr {
+    border-left: 3px solid transparent;
+}
+
+.sales-table tbody tr:hover {
+    border-left: 3px solid var(--sales-color);
+}
+
+/* Purchases table specific */
+.purchases-table tbody tr {
+    border-left: 3px solid transparent;
+}
+
+.purchases-table tbody tr:hover {
+    border-left: 3px solid var(--purchases-color);
+}
+
+/* Form styling */
+.form-control, .form-select {
+    border-radius: 0.5rem;
+    padding: 0.625rem 1rem;
+    border: 1px solid var(--border-color);
+    font-size: 0.95rem;
+}
+
+.form-control:focus, .form-select:focus {
+    border-color: var(--inventory-color);
+    box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.15);
+}
+
+.form-label {
+    font-weight: 500;
+    color: var(--text-primary);
+    margin-bottom: 0.5rem;
+}
+
+/* Button styling */
+.btn {
+    border-radius: 0.5rem;
+    padding: 0.625rem 1.25rem;
+    font-weight: 500;
+    transition: all 0.2s;
+}
+
+.btn-primary {
+    background-color: var(--inventory-color);
+    border-color: var(--inventory-color);
+}
+
+.btn-success {
+    background-color: var(--sales-color);
+    border-color: var(--sales-color);
+}
+
+.btn-warning {
+    background-color: var(--purchases-color);
+    border-color: var(--purchases-color);
+    color: white;
+}
+
+.btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Modal styling */
+.modal-content {
+    border-radius: 0.75rem;
+    border: none;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+}
+
+.modal-header {
+    border-bottom: 1px solid var(--border-color);
+    padding: 1.5rem;
+}
+
+.modal-footer {
+    border-top: 1px solid var(--border-color);
+    padding: 1.5rem;
+}
+
+/* Alert styling */
+.alert {
+    border-radius: 0.5rem;
+    border: none;
+    padding: 1rem 1.5rem;
+}
+
+/* Status badges */
+.badge {
+    padding: 0.5rem 0.75rem;
+    border-radius: 0.375rem;
+    font-weight: 500;
+}
+
+.badge-sales {
+    background-color: var(--sales-color);
+    color: white;
+}
+
+.badge-purchase {
+    background-color: var(--purchases-color);
+    color: white;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .card-body {
+        padding: 1.25rem;
+    }
+
+    .table-responsive {
+        margin: 0 -1.25rem;
+        width: calc(100% + 2.5rem);
+    }
+
+    .btn {
+        width: 100%;
+        margin-bottom: 0.5rem;
+    }
+}
+
+/* Dark theme specific adjustments */
+[data-bs-theme="dark"] {
+    --text-primary: #e9ecef;
+    --border-color: #343a40;
+    --hover-bg: #2c3034;
+
+    .card {
+        background-color: #2c3034;
+    }
+
+    .table {
+        color: #e9ecef;
+    }
+
+    .table th {
+        background-color: #343a40;
+    }
+
+    .form-control, .form-select {
+        background-color: #343a40;
+        border-color: #495057;
+        color: #e9ecef;
+    }
+
+    .modal-content {
+        background-color: #2c3034;
+    }
+}
