@@ -1,0 +1,339 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8">
+        <div class="card mb-4">
+            <div class="card-body">
+                <h3 class="card-title">New Sale</h3>
+                <form id="pos-form" method="POST" class="mb-3">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Barcode</label>
+                            <input type="text" class="form-control" id="barcode-input" placeholder="Scan or enter barcode">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Product</label>
+                            <select class="form-select" name="product_id" id="product-select" required>
+                                <option value="">Select Product</option>
+                                {% for product in products %}
+                                <option value="{{ product.id }}" 
+                                        data-price="{{ product.price }}"
+                                        data-gst="{{ product.gst_rate }}"
+                                        data-stock="{{ product.quantity }}"
+                                        data-barcode="{{ product.barcode }}">
+                                    {{ product.name }} (Stock: {{ product.quantity }})
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Quantity</label>
+                            <input type="number" class="form-control" name="quantity" id="quantity-input" required min="1">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Price</label>
+                            <input type="number" step="0.01" class="form-control" name="price" id="price-input" required>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">GST Rate (%)</label>
+                            <input type="number" class="form-control" id="gst-rate" readonly>
+                        </div>
+                        <div class="col-12">
+                            <button type="button" class="btn btn-primary" id="add-item-btn">Add Item</button>
+                        </div>
+                    </div>
+                </form>
+
+                <div class="table-responsive">
+                    <table class="table" id="bill-items">
+                        <thead>
+                            <tr>
+                                <th>Product</th>
+                                <th>Quantity</th>
+                                <th>Price</th>
+                                <th>Subtotal</th>
+                                <th>GST</th>
+                                <th>Total</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        </tbody>
+                        <tfoot>
+                            <tr>
+                                <td colspan="3"><strong>Total</strong></td>
+                                <td id="subtotal-amount">₹0.00</td>
+                                <td id="total-gst">₹0.00</td>
+                                <td id="total-amount">₹0.00</td>
+                                <td></td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+
+                <div class="text-end mt-3">
+                    <button type="button" class="btn btn-success" id="complete-sale-btn">Complete Sale</button>
+                    <button type="button" class="btn btn-danger" id="clear-bill-btn">Clear Bill</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-body">
+                <h3 class="card-title">Bill Summary</h3>
+                <div class="mb-3">
+                    <div class="row mb-2">
+                        <div class="col">Subtotal:</div>
+                        <div class="col text-end" id="summary-subtotal">₹0.00</div>
+                    </div>
+                    <div class="row mb-2">
+                        <div class="col">CGST:</div>
+                        <div class="col text-end" id="summary-cgst">₹0.00</div>
+                    </div>
+                    <div class="row mb-2">
+                        <div class="col">SGST:</div>
+                        <div class="col text-end" id="summary-sgst">₹0.00</div>
+                    </div>
+                    <div class="row mb-2">
+                        <div class="col">Total GST:</div>
+                        <div class="col text-end" id="summary-total-gst">₹0.00</div>
+                    </div>
+                    <hr>
+                    <div class="row">
+                        <div class="col"><strong>Grand Total:</strong></div>
+                        <div class="col text-end"><strong id="summary-total">₹0.00</strong></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card mt-4">
+    <div class="card-body">
+        <h3 class="card-title">Sales History</h3>
+        <div class="table-responsive">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Product</th>
+                        <th>Quantity</th>
+                        <th>Price</th>
+                        <th>Subtotal</th>
+                        <th>CGST</th>
+                        <th>SGST</th>
+                        <th>Total</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for sale in sales %}
+                    <tr>
+                        <td>{{ sale.date.strftime('%Y-%m-%d %H:%M:%S') }}</td>
+                        <td>{{ sale.product_name }}</td>
+                        <td>{{ sale.quantity }}</td>
+                        <td>₹{{ "%.2f"|format(sale.price) }}</td>
+                        <td>₹{{ "%.2f"|format(sale.subtotal) }}</td>
+                        <td>₹{{ "%.2f"|format(sale.cgst) }}</td>
+                        <td>₹{{ "%.2f"|format(sale.sgst) }}</td>
+                        <td>₹{{ "%.2f"|format(sale.total) }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+let currentBillItems = [];
+
+function formatCurrency(amount) {
+    return '₹' + parseFloat(amount).toFixed(2);
+}
+
+function calculateTax(subtotal, gstRate) {
+    const gstAmount = subtotal * (gstRate / 100);
+    const cgst = gstAmount / 2;
+    const sgst = gstAmount / 2;
+    return {
+        cgst,
+        sgst,
+        totalGst: gstAmount,
+        total: subtotal + gstAmount
+    };
+}
+
+function updateBillSummary() {
+    let subtotal = 0;
+    let totalGst = 0;
+
+    currentBillItems.forEach(item => {
+        subtotal += item.subtotal;
+        totalGst += item.gstAmount;
+    });
+
+    const cgst = totalGst / 2;
+    const sgst = totalGst / 2;
+    const total = subtotal + totalGst;
+
+    document.getElementById('summary-subtotal').textContent = formatCurrency(subtotal);
+    document.getElementById('summary-cgst').textContent = formatCurrency(cgst);
+    document.getElementById('summary-sgst').textContent = formatCurrency(sgst);
+    document.getElementById('summary-total-gst').textContent = formatCurrency(totalGst);
+    document.getElementById('summary-total').textContent = formatCurrency(total);
+
+    // Update table footer
+    document.getElementById('subtotal-amount').textContent = formatCurrency(subtotal);
+    document.getElementById('total-gst').textContent = formatCurrency(totalGst);
+    document.getElementById('total-amount').textContent = formatCurrency(total);
+}
+
+function addItemToBill() {
+    const productSelect = document.getElementById('product-select');
+    const option = productSelect.selectedOptions[0];
+    if (!option || option.value === '') return;
+
+    const quantity = parseFloat(document.getElementById('quantity-input').value);
+    const price = parseFloat(document.getElementById('price-input').value);
+    const gstRate = parseFloat(document.getElementById('gst-rate').value);
+
+    if (!quantity || !price) return;
+
+    const subtotal = quantity * price;
+    const tax = calculateTax(subtotal, gstRate);
+
+    const item = {
+        productId: option.value,
+        productName: option.text.split(' (')[0],
+        quantity: quantity,
+        price: price,
+        subtotal: subtotal,
+        gstRate: gstRate,
+        gstAmount: tax.totalGst,
+        total: tax.total
+    };
+
+    currentBillItems.push(item);
+
+    const row = document.createElement('tr');
+    row.innerHTML = `
+        <td>${item.productName}</td>
+        <td>${item.quantity}</td>
+        <td>${formatCurrency(item.price)}</td>
+        <td>${formatCurrency(item.subtotal)}</td>
+        <td>${formatCurrency(item.gstAmount)}</td>
+        <td>${formatCurrency(item.total)}</td>
+        <td>
+            <button type="button" class="btn btn-sm btn-danger" onclick="removeItem(this)">
+                Remove
+            </button>
+        </td>
+    `;
+
+    document.querySelector('#bill-items tbody').appendChild(row);
+    updateBillSummary();
+
+    // Reset form
+    document.getElementById('pos-form').reset();
+    document.getElementById('barcode-input').focus();
+}
+
+function removeItem(button) {
+    const row = button.closest('tr');
+    const index = Array.from(row.parentNode.children).indexOf(row);
+    currentBillItems.splice(index, 1);
+    row.remove();
+    updateBillSummary();
+}
+
+function clearBill() {
+    currentBillItems = [];
+    document.querySelector('#bill-items tbody').innerHTML = '';
+    document.getElementById('pos-form').reset();
+    updateBillSummary();
+}
+
+// Event Listeners
+document.addEventListener('DOMContentLoaded', function() {
+    const productSelect = document.getElementById('product-select');
+    const barcodeInput = document.getElementById('barcode-input');
+    const quantityInput = document.getElementById('quantity-input');
+    const priceInput = document.getElementById('price-input');
+    const gstRateInput = document.getElementById('gst-rate');
+
+    // Barcode scanner handling
+    barcodeInput.addEventListener('input', function() {
+        const barcode = this.value.trim();
+        if (barcode) {
+            const option = Array.from(productSelect.options).find(opt => 
+                opt.dataset.barcode === barcode
+            );
+            if (option) {
+                productSelect.value = option.value;
+                productSelect.dispatchEvent(new Event('change'));
+                this.value = '';
+                quantityInput.focus();
+            }
+        }
+    });
+
+    // Product selection handling
+    productSelect.addEventListener('change', function() {
+        const option = this.selectedOptions[0];
+        if (option && option.value) {
+            priceInput.value = option.dataset.price;
+            gstRateInput.value = option.dataset.gst;
+            quantityInput.max = option.dataset.stock;
+            quantityInput.title = `Max available: ${option.dataset.stock}`;
+        } else {
+            priceInput.value = '';
+            gstRateInput.value = '';
+            quantityInput.removeAttribute('max');
+            quantityInput.removeAttribute('title');
+        }
+    });
+
+    // Add item button
+    document.getElementById('add-item-btn').addEventListener('click', addItemToBill);
+
+    // Complete sale button
+    document.getElementById('complete-sale-btn').addEventListener('click', async function() {
+        if (currentBillItems.length === 0) {
+            alert('Please add items to the bill first');
+            return;
+        }
+
+        try {
+            const response = await fetch('/sales', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    items: currentBillItems
+                })
+            });
+
+            if (response.ok) {
+                alert('Sale completed successfully!');
+                clearBill();
+                location.reload(); // Refresh to update sales history
+            } else {
+                throw new Error('Failed to complete sale');
+            }
+        } catch (error) {
+            alert('Error completing sale: ' + error.message);
+        }
+    });
+
+    // Clear bill button
+    document.getElementById('clear-bill-btn').addEventListener('click', clearBill);
+});
+</script>
+{% endblock %}
