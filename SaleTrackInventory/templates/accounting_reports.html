@@ -1,0 +1,72 @@
+
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title">Financial Reports</h5>
+                </div>
+                <div class="card-body">
+                    <ul class="nav nav-tabs" id="reportTabs">
+                        <li class="nav-item">
+                            <a class="nav-link active" data-bs-toggle="tab" href="#balance">Balance Sheet</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" data-bs-toggle="tab" href="#income">Income Statement</a>
+                        </li>
+                    </ul>
+                    
+                    <div class="tab-content mt-3">
+                        {% if balance_sheet %}
+                        <div class="tab-pane active" id="balance">
+                            <h3>Balance Sheet</h3>
+                            <table class="table">
+                                <tr>
+                                    <th>Assets</th>
+                                    <td>₹{{ balance_sheet.assets }}</td>
+                                </tr>
+                                <tr>
+                                    <th>Liabilities</th>
+                                    <td>₹{{ balance_sheet.liabilities }}</td>
+                                </tr>
+                                <tr>
+                                    <th>Equity</th>
+                                    <td>₹{{ balance_sheet.equity }}</td>
+                                </tr>
+                            </table>
+                        </div>
+                        {% endif %}
+                        
+                        {% if income_statement %}
+                        <div class="tab-pane" id="income">
+                            <h3>Income Statement</h3>
+                            <table class="table">
+                                <tr>
+                                    <th>Sales</th>
+                                    <td>₹{{ income_statement.sales }}</td>
+                                </tr>
+                                <tr>
+                                    <th>Purchases</th>
+                                    <td>₹{{ income_statement.purchases }}</td>
+                                </tr>
+                                <tr>
+                                    <th>Expenses</th>
+                                    <td>₹{{ income_statement.expenses }}</td>
+                                </tr>
+                                <tr>
+                                    <th>Net Profit</th>
+                                    <td>₹{{ income_statement.profit }}</td>
+                                </tr>
+                            </table>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

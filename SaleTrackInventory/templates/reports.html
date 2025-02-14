@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="card mb-4">
+    <div class="card-body">
+        <h3 class="card-title">Financial Reports</h3>
+
+        <div class="row mb-4">
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-body">
+                        <h5>Sales Report</h5>
+                        <div class="mb-3">
+                            <label>Date Range</label>
+                            <input type="date" class="form-control" id="salesStartDate">
+                            <input type="date" class="form-control mt-2" id="salesEndDate">
+                        </div>
+                        <button class="btn btn-primary" onclick="generateReport('sales')">Generate</button>
+                        <a href="{{ url_for('reports', type='sales', format='excel') }}" class="btn btn-success">Export Excel</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-body">
+                        <h5>Purchase Report</h5>
+                        <div class="mb-3">
+                            <label>Date Range</label>
+                            <input type="date" class="form-control" id="purchaseStartDate">
+                            <input type="date" class="form-control mt-2" id="purchaseEndDate">
+                        </div>
+                        <button class="btn btn-primary" onclick="generateReport('purchases')">Generate</button>
+                        <a href="{{ url_for('reports', type='purchases', format='excel') }}" class="btn btn-success">Export Excel</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-body">
+                        <h5>Inventory Report</h5>
+                        <div class="mb-3">
+                            <select class="form-control" id="inventoryCategory">
+                                <option value="">All Categories</option>
+                                {% for category in categories %}
+                                <option value="{{ category }}">{{ category }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <button class="btn btn-primary" onclick="generateReport('inventory')">Generate</button>
+                        <a href="{{ url_for('reports', type='inventory', format='excel') }}" class="btn btn-success">Export Excel</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="reportContent">
+            <!-- Report content will be loaded here -->
+        </div>
+    </div>
+</div>
+
+<script>
+function generateReport(type) {
+    const params = new URLSearchParams();
+    params.append('type', type);
+
+    if (type === 'sales') {
+        params.append('start_date', document.getElementById('salesStartDate').value);
+        params.append('end_date', document.getElementById('salesEndDate').value);
+    } else if (type === 'purchases') {
+        params.append('start_date', document.getElementById('purchaseStartDate').value);
+        params.append('end_date', document.getElementById('purchaseEndDate').value);
+    } else if (type === 'inventory') {
+        params.append('category', document.getElementById('inventoryCategory').value);
+    }
+
+    fetch(`/reports/generate?${params.toString()}`)
+        .then(response => response.text())
+        .then(html => {
+            document.getElementById('reportContent').innerHTML = html;
+        });
+}
+</script>
+{% endblock %}
